@@ -1,5 +1,8 @@
 class Settings:
     def __init__(self):
+        # Assets
+        self.spritemap = r"..\assets\UnizenCustom.png"
+
         # Color
         self.BLACK = (0,0,0)
         self.WHITE = (255,255,255)

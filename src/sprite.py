@@ -9,5 +9,6 @@ class Sprite(Sprite):
         self.position = tile_position
         self.tile_type = tile_type
 
-    def update(self, offset:int=0):
-        pass
+    def update_o(self, offset:int=[0,0]):
+        self.position[0] += offset[0]
+        self.position[1] += offset[1]
