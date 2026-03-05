@@ -14,3 +14,6 @@ class Settings:
         self.WINDOW_TITLE = "Simple Spellsword"
         self.BASE_WINDOW_SIZE = (896, 896)
         self.BASE_WINDOW_BACKGROUND_COLOR = self.BLACK
+
+        # Map
+        self.BASE_TILE_SIZE = 12

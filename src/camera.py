@@ -18,12 +18,12 @@ class Camera:
             new_offset_x = (
                 self.last_focus_object_position[0] - 
                 self.focus_object.position[0]
-            )
+                )
         if self.focus_object[1] != self.last_focus_object_position[1]:
             new_offset_y = (
                 self.last_focus_object_position[1] - 
                 self.focus_object.position[1] 
-            )
+                )
         
         self.sprite_offset[0] += new_offset_x
         self.sprite_offset[1] += new_offset_y
@@ -39,7 +39,7 @@ class Camera:
 
         self.surface = pygame.Surface(
             self.rect.width, self.rect.height, pygame.SRCALPHA
-        )
+            )
 
     def set_focus(self, focus_object):
         self.focus_object = focus_object
