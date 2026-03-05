@@ -1,5 +1,8 @@
 import pygame, sys
 from settings import Settings
+from camera import Camera
+from tileset import Tileset
+from tile_type import TileType
 
 
 class Game:
