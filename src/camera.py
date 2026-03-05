@@ -8,7 +8,7 @@ class Camera:
         else: self.set_rect(0,0,0,0)
 
     def draw(self):
-        self.game.map.sprites.draw(self.surface)
+        self.game.map.tiles.draw(self.surface)
         self.game.screen.blit(self.surface, self.rect)
 
     def update(self):
@@ -28,7 +28,7 @@ class Camera:
         self.sprite_offset[0] += new_offset_x
         self.sprite_offset[1] += new_offset_y
 
-        self.game.map.sprites.update(self.sprite_offset)
+        self.game.map.tile.update(self.sprite_offset)
         self.last_focus_object_position = self.focus_object.position
 
     def set_rect(self, rect):

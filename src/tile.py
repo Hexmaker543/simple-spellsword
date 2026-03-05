@@ -1,14 +1,13 @@
-import pygame
 from pygame.sprite import Sprite
 
 
-class Sprite(Sprite):
+class Tile(Sprite):
     def __init__(self, Game, tile_position, tile_type):
         super().__init__()
         self.game = Game
         self.position = tile_position
         self.tile_type = tile_type
 
-    def update_o(self, offset:int=[0,0]):
+    def update(self, offset:int=[0,0]):
         self.position[0] += offset[0]
         self.position[1] += offset[1]

@@ -1,7 +1,7 @@
 import pygame
 from tileset import Tileset
 from tile_type import TileType
-from sprite import Sprite
+from tile import Tile
 from pathlib import Path
 
 
@@ -10,7 +10,7 @@ class Map():
         super().__init__()
         self.game = Game
 
-        self.sprites = pygame.sprite.Group()
+        self.tiles = pygame.sprite.Group()
 
     def _parse_words(self, line):
         normalized = " ".join(line.split())
@@ -26,16 +26,23 @@ class Map():
         self.legend[identifier] = TileType(name, identifier, image, solid)
 
     def _handle_sprite_entry(self, line):
-        delimiters = {
-            'tile stackers' : ['[', ']', '(', ')'],
-            'separators' : [',','.','-','_']
-            }
         identifiers = self.legend.keys()
+        is_reading_stacked_tile = False
+        char_cache = ''
         for char in line:
-            if char not in identifiers or delimiters: continue
-            if char in delimiters['separators']: continue
-
-            if char in identifiers: pass
+            if char == ',': continue
+            elif char == '[': 
+                is_reading_stacked_tile = True
+                continue
+            elif char == ']':
+                is_reading_stacked_tile = False
+                continue
+            elif char_cache + char in identifiers:
+                 pass # FIX 
+            else: 
+                char_cache += char
+                continue
+                
 
     def _import_map(self, map_file):
         mapfile = Path("assets/map.map")
