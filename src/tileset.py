@@ -20,8 +20,10 @@ class Tileset:
         for y in range(0, image_height, step_value):
             new_row = []
             for x in range(0, image_width, step_value):
-                new_tile = self.surface.subsurface(x+1, y+1, self.cell_size,
-                                                             self.cell_size)
+                new_tile = self.surface.subsurface(x+self.padding, 
+                                                   y+self.padding, 
+                                                   self.cell_size,
+                                                   self.cell_size)
                 new_row.append(new_tile)
             self.tiles.append(new_row)
 
