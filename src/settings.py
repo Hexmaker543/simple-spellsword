@@ -1,7 +1,8 @@
 class Settings:
     def __init__(self):
         # Assets
-        self.spritemap = r"..\assets\UnizenCustom.png"
+        self.spritemap = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\UnizenCustom.png"
+        self.map = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\map.map"
 
         # Color
         self.BLACK = (0,0,0)

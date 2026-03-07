@@ -1,6 +1,5 @@
 import pygame
 from tileset import Tileset
-from tile_type import TileType
 from tile import Tile
 from pathlib import Path
 
@@ -11,44 +10,67 @@ class Map():
         self.game = Game
         self._import_map(map_file)
 
+    def draw(self):
+        self._draw_grid()
+
+    def _draw_grid(self):
+        for y, row in enumerate(self.grid):
+            for x, column in enumerate(row):
+                for z, _ in enumerate(column):
+                    self.grid[y][x][z].draw()
+
+    def update(self):
+        self.all_sprites.update()
+
     def _parse_words(self, line):
         normalized = " ".join(line.split())
         return [words.strip() for words in normalized.split(",")]
     
     def _handle_tileset(self, words):
-        _, path, cell_size, padding = words
-        padding = padding or 0
-        self.tileset = Tileset(self, path, cell_size, padding)
+        _, cell_size, padding, path = words
+        padding = int(padding) or 0
+        self.tileset = Tileset(self, path, int(cell_size), int(padding))
 
     def _handle_legend_entry(self, words):
-        identifier, name, solid, image = words
-        self.legend[identifier] = TileType(name, identifier, image, solid)
+        identifier = words[0]
+        is_solid = bool(words[1])
+        image_x = int(words[2])
+        image_y = int(words[3])
+        image = self.tileset.get_tile(image_x, image_y)
+        self.legend[identifier] = [is_solid, image]
+
+    def _create_tile(self, identifier, x, y):
+        is_solid = self.legend[identifier][0]
+        image = self.legend[identifier][1]
+        return Tile(Game=self.game, 
+            tile_position=[x,y], 
+            tile_identifier=identifier,
+            image=image,
+            is_solid=is_solid,
+        )
+    
+    def _add_tile(self, identifier, x, y):
+        new_tile = self._create_tile(identifier, x, y)
+        self.grid[y][x].append(new_tile)
+        self.all_sprites.add(new_tile)
 
     def _handle_sprite_entry(self, line, y):
         identifiers = self.legend.keys()
         reading_stacked_tile = False
         char_cache = ''
         x = 0
-
         for char in line:
             char_cache += char
-
-            if reading_stacked_tile:
-                char_cache += char
-                if char == ']':
-                    x += 1 
-                    reading_stacked_tile = False
-                
-                elif char_cache in identifiers:
-                    new_tile = Tile(self, [x,y], self.legend[char_cache])
-                    self.grid.append(new_tile)
-                    self.all_sprites.add(new_tile)
+            if reading_stacked_tile and char == ']':
+                x += 1 
+                reading_stacked_tile = False
 
             elif char == '[': reading_stacked_tile = True     
+            
             elif char_cache in identifiers:
-                self.grid.append(new_tile)
-                self.all_sprites.add(Tile(self, [x,y], self.legend[char_cache]))
-                x += 1
+                self._add_tile(char_cache, x, y)
+                if not reading_stacked_tile: x += 1
+            
             else: continue
 
             char_cache = ''
@@ -73,11 +95,15 @@ class Map():
                 words = self._parse_words(raw_line)
                 if not words or not words[0]:
                     continue
-                if words[0] == 'MAP_SIZE': 
-                    map_size = 1
-                    self.map_size = words[map_size]
-                if words[0] == 'TILEMAP_PATH':
+                
+                elif words[0] == 'MAP_SIZE': 
+                    x = 1
+                    y = 2
+                    self.map_size = int(words[x]), int(words[y])
+
+                elif words[0] == 'TILEMAP_PATH':
                     self._handle_tileset(words)
+                
                 else:
                     self._handle_legend_entry(words)
             
@@ -91,6 +117,3 @@ class Map():
             else: raise NotImplemented(
                 f"Error. Cannot parse line {line_number+1} in '{map_file}'"
                 )
-
-    def _create_sprite(self, tile_position, Sprite):
-        self.sprites[tile_position[0]][tile_position[1]] = Sprite

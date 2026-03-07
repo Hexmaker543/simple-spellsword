@@ -1,6 +1,8 @@
 import pygame, sys
 from settings import Settings
 from camera import Camera
+from map import Map
+from player import Player
 
 
 class Game:
@@ -10,8 +12,11 @@ class Game:
         pygame.display.set_caption(self.settings.WINDOW_TITLE)
         self._initialize_screen()
 
-        self.camera = Camera(self, (0,0,self.screen.get_width(), 
+        self.map = Map(self, self.settings.map)
+        self.camera = Camera(self, (0,0, self.screen.get_width(), 
                                     self.screen.get_height()))
+        self.player = Player(self, [0,0])
+        self.camera.set_focus(self.player)
 
     def _initialize_screen(self):
         self.screen = pygame.display.set_mode(self.settings.BASE_WINDOW_SIZE)
@@ -20,20 +25,27 @@ class Game:
     def run(self):
         while True:
             self._handle_input()
-            self.screen.fill(self.settings.BASE_WINDOW_BACKGROUND_COLOR)
+            self._update()
+            self._draw()
             pygame.display.flip()
+
+    def _update(self):
+        self.camera.update()
+
+    def _draw(self):
+        self.screen.fill(self.settings.BASE_WINDOW_BACKGROUND_COLOR)
+        self.camera.draw()
 
     def _handle_input(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
 
-    def get_pixel_position(self, tile_position):
+    def convert_position_to_pixel_position(self, object):
         tile_size = self.settings.BASE_TILE_SIZE
-        x_position = tile_position[0] * tile_size
-        y_position = tile_position[1] * tile_size
-        pixel_position = [x_position, y_position]
+        pos_x = object.position[0] * tile_size
+        pos_y = object.position[1] * tile_size
 
-        return pixel_position
+        object.rect.topleft = (pos_x, pos_y)
 
 
 game = Game()

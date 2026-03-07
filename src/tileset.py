@@ -7,6 +7,7 @@ class Tileset:
         self.filepath = tileset_filepath
         self.cell_size = cell_size
         self.padding = padding
+        self._render_tileset()
         self._get_tiles()
 
     def _render_tileset(self):
@@ -28,4 +29,4 @@ class Tileset:
             self.tiles.append(new_row)
 
     def get_tile(self, tile_column, tile_row):
-        return self.tiles[tile_column, tile_row]
+        return self.tiles[tile_column][tile_row]
