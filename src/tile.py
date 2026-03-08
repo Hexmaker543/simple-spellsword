@@ -12,15 +12,12 @@ class Tile(Sprite):
         self.is_solid = is_solid
 
         self._render()
-        self.update()
 
     def update(self, offset:int=[0,0]):
-        self.position[0] += offset[0]
-        self.position[1] += offset[1]
-        self.game.convert_position_to_pixel_position(self)
+        self.game.convert_position_to_pixel_position(self, offset)
 
     def draw(self):
-        self.game.camera.surface.blit(self.surface, self.rect)
+        self.game.map.surface.blit(self.surface, self.rect)
 
     def _render(self):
         self.surface = self.image

@@ -2,7 +2,7 @@ import pygame
 
 
 class Tileset:
-    def __init__(self, Game, tileset_filepath, cell_size, padding):
+    def __init__(self, Game, tileset_filepath, cell_size, padding:int=0):
         self.game = Game
         self.filepath = tileset_filepath
         self.cell_size = cell_size
@@ -11,7 +11,7 @@ class Tileset:
         self._get_tiles()
 
     def _render_tileset(self):
-        self.surface = pygame.image.load(self.filepath)
+        self.surface = pygame.image.load(self.filepath).convert_alpha()
 
     def _get_tiles(self):
         self.tiles = []

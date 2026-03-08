@@ -9,7 +9,6 @@ class Camera:
         else: self.set_rect(0,0,0,0)
 
     def draw(self):
-        self.surface.fill((0,0,0))
         self.game.map.draw()
         self.game.screen.blit(self.surface, self.rect)
 
