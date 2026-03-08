@@ -1,6 +1,3 @@
-import pygame
-
-
 class Player:
     def __init__(self, Game, position:list[int,int]=[0,0], 
                  sprite:list[int,int]=[0,0]):
@@ -25,7 +22,17 @@ class Player:
         self.surface = self.game.map.tileset.tiles[self.sprite[0]][self.sprite[1]]
         self.rect = self.surface.get_rect()
 
-    def _can_move(self, tile:tuple[int,int]):
-        for layer in self.game.map.grid[tile[1]][tile[0]]:
-            if layer.is_solid: return False
-        else: return True
+    def _can_move(self, tile):
+        x, y = tile
+
+        if y < 0 or y >= len(self.game.map.grid):
+            return False
+
+        if x < 0 or x >= len(self.game.map.grid[y]):
+            return False
+
+        for layer in self.game.map.grid[y][x]:
+            if layer.is_solid:
+                return False
+
+        return True

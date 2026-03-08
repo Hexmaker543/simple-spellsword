@@ -14,10 +14,18 @@ class Map():
     def _resize_map(self):
         new_width = self.base_width * self.tile_scale
         new_height = self.base_height * self.tile_scale
-        new_map = pygame.transform.scale(self.surface, (new_width, new_height))
-        self.surface = new_map
+        self.surface = pygame.transform.scale(self.surface, (new_width, new_height))
         self.rect = self.surface.get_rect()
-        self.rect.center = self.game.camera.surface.get_rect().center
+
+        screen_center = self.game.screen.get_rect().center
+
+        player_px = self.game.player.position[0] * self.cell_size * self.tile_scale
+        player_py = self.game.player.position[1] * self.cell_size * self.tile_scale
+
+        self.rect.topleft = (
+            screen_center[0] - player_px,
+            screen_center[1] - player_py
+        )
 
     def _render_map(self):
         self.base_width = self.map_size[0] * self.cell_size
@@ -29,7 +37,7 @@ class Map():
         self._render_map()
         self._draw_grid()
         self._resize_map()
-        self.game.camera.surface.blit(self.surface, self.rect)
+        self.game.screen.blit(self.surface, self.rect)
         self.surface.fill((0,0,0))
 
     def _draw_grid(self):
@@ -65,11 +73,16 @@ class Map():
 
     def _handle_legend_entry(self, words):
         identifier = words[0]
-        is_solid = bool(words[1])
+        is_solid = self._parse_boolean(words[1])
         image_x = int(words[2])
         image_y = int(words[3])
         image = self.tileset.get_tile(image_x, image_y)
         self.legend[identifier] = [is_solid, image]
+
+    def _parse_boolean(self, bool_string):
+        if bool_string.lower() == 'false': return False
+        elif bool_string.lower() == 'true': return True
+        else: raise NotImplemented("_parse_boolean() given invalid arg")
 
     def _create_tile(self, identifier, x, y):
         is_solid = self.legend[identifier][0]
@@ -93,7 +106,7 @@ class Map():
         x = 0
         for char in line:
             char_cache += char
-            if char == ',': pass
+            if char in  (',', ' '): pass
             
             elif reading_stacked_tile and char == ']':
                 x += 1 

@@ -3,7 +3,7 @@ MAP_SIZE, 11, 11, 5
 TILEMAP_PATH, 12, 0, C:\Users\asmod\Lair\projects\Simple SpellSword\assets\UnizenCustom.png
 
 0, false, 9, 6
-#, true, 5, 0
+#, true, 7, 2
 D, false, 8, 0
 G, false, 8, 8
 
@@ -17,15 +17,15 @@ Ptl, false, 4, 2
 Sk, true, 2, 1
 
 START_MAP
-000Py0000000
-PbrPxPxPtl0000000
-Py0#######00
-Py0#GGGGG#00
-Py0#GGGGG#00
-Py0#GG[G,Sk]GG#00
-Py0#GGGGG#00
-Py0#GGGGG#00
-Py0###[G,D]###00
-PtrPxPxPxPxPtl00000
-00000000000
+0   0   0   Py  0   0      0 0 0 0 0
+Pbr Px  Px  Ptl 0   0      0 0 0 0 0
+Py  0   #   #   #   #      # # # 0 0 
+Py  0   #   G   G   G      G G # 0 0
+Py  0   #   G   G   G      G G # 0 0
+Py  0   #   G   G   [G,Sk] G G # 0 0 
+Py  0   #   G   G   G      G G # 0 0
+Py  0   #   G   G   G      G G # 0 0
+Py  0   #   #   #   [G,D]  # # # 0 0
+Ptr Px  Px  Px  Px  Ptl    0 0 0 0 0
+0   0   0   0   0   0      0 0 0 0 0
 END_MAP

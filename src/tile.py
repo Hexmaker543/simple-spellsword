@@ -13,8 +13,8 @@ class Tile(Sprite):
 
         self._render()
 
-    def update(self, offset:int=[0,0]):
-        self.game.convert_position_to_pixel_position(self, offset)
+    def update(self):
+        self.game.convert_position_to_pixel_position(self)
 
     def draw(self):
         self.game.map.surface.blit(self.surface, self.rect)
