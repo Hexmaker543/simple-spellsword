@@ -1,17 +1,24 @@
 import pygame, sys
 from settings import Settings
 from map import Map
+from map_maker import MapMaker
 from player import Player
 
 
 class Game:
     def __init__(self):
+        # Flags
+        self.map_maker_active = False
+        self.lctrl_pressed = False
+        self.lshift_pressed = False
+
         pygame.init()
         self.settings = Settings()
-        pygame.display.set_caption(self.settings.WINDOW_TITLE)
+        pygame.display.set_caption(self.settings.WINDOW_TITLE) 
         self._initialize_screen()
 
         self.map = Map(self, self.settings.map)
+        self.map_maker = MapMaker(self, (10,10), 12)
         self.player = Player(self, [5,10], [0,0])
 
     def _initialize_screen(self):
@@ -26,22 +33,41 @@ class Game:
             pygame.display.flip()
 
     def _update(self):
-        self.map.update()
+        if self.map_maker_active: self.map_maker.update()
+        else: self.map.update()
 
     def _draw(self):
         self.screen.fill(self.settings.BASE_WINDOW_BACKGROUND_COLOR)
-        self.map.draw()
+        if self.map_maker_active: self.map_maker.draw()
+        else: self.map.draw()
 
     def _handle_input(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
             if event.type == pygame.KEYDOWN: self._handle_keydown_events(event)
+            if event.type == pygame.KEYUP: self._handle_keyup_events(event)
 
     def _handle_keydown_events(self, event):
+        m_pressed = pygame.key.get_pressed()[pygame.K_m]
+
+        if event.key == pygame.K_LSHIFT: self.lshift_pressed = True
+        if event.key == pygame.K_LCTRL: self.lctrl_pressed = True
+
+        if self.lshift_pressed and self.lctrl_pressed and m_pressed:
+            if self.map_maker_active: self.map_maker_active = False
+            else: self.map_maker_active = True
+
+        if event.key == pygame.K_ESCAPE: sys.exit()
+
+        if self.map_maker_active: return
         if event.key == pygame.K_w: self.player.move([0,-1])
         if event.key == pygame.K_s: self.player.move([0,1])
         if event.key == pygame.K_d: self.player.move([1,0])
         if event.key == pygame.K_a: self.player.move([-1,0])
+
+    def _handle_keyup_events(self, event):
+        if event.key == pygame.K_LSHIFT: self.lshift_pressed = False
+        if event.key == pygame.K_LCTRL: self.lctrl_pressed = False
 
     def convert_position_to_pixel_position(self, object):
         tile_size = self.map.cell_size

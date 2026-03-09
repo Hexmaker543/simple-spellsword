@@ -7,6 +7,7 @@ class Settings:
         # Color
         self.BLACK = (0,0,0)
         self.WHITE = (255,255,255)
+        self.GREY = (147,147,147)
         self.RED = (255,0,0)
         self.GREEN = (0,255,0)
         self.BLUE = (0,0,255)
@@ -18,3 +19,6 @@ class Settings:
 
         # Map
         self.BASE_TILE_SIZE = 12
+
+        # Map Maker 
+        self.MAP_MAKER_ON = True
