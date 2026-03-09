@@ -16,6 +16,7 @@ class MapMaker:
         self.grid_rects =  []
 
         self.toggle_darkmode()
+        self._render_map()
 
     def pan(self, position_increment:list[int,int]):
         speed = self.cell_size
@@ -42,17 +43,23 @@ class MapMaker:
 
     def on_click(self, event):
         mouse_position = pygame.mouse.get_pos()
-        if not self.grid_rect.collidepoint(mouse_position): return
-
         left_click = event.button == 1
         right_click = event.button == 3
 
-        if not left_click: return
+        tilex, tiley = self._get_clicked_tile(mouse_position)
+
+        if right_click: 
+            self._remove_tile_from_map(tilex, tiley)
+            return
+        elif left_click: self._add_tile_to_map(tilex, tiley)
+
+    def _get_clicked_tile(self, mouse_position):
+        if not self.grid_rect.collidepoint(mouse_position): return
 
         for y, row in enumerate (self.grid_rects):
             for x, rect in enumerate (row):
                 if not rect.collidepoint(mouse_position): continue
-                self._add_tile_to_map(x, y)
+                return x, y
 
     def toggle_darkmode(self):
         if self.darkmode_on: 
@@ -74,6 +81,7 @@ class MapMaker:
     def draw(self):
         self.game.screen.blit(self.bg_surface, self.bg_rect)
         self.game.screen.blit(self.grid_surface, self.grid_rect)
+        self.game.screen.blit(self.map_surface, self.grid_rect)
         self._draw_active_tile()
 
     def _draw_active_tile(self):
@@ -85,6 +93,21 @@ class MapMaker:
 
         self.game.screen.blit(active_tile, active_tile_rect)
 
+    def _render_map(self):
+        width = self.grid_surface.get_width()
+        height = self.grid_surface.get_height()
+
+        self.map_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.map_rect = self.map_surface.get_rect()
+
+        for y, row in enumerate(self.grid):
+            for x, layer in enumerate(row):
+                for tile_index in layer:
+                    tile_image = self.tiles[tile_index][1]
+                    tile_image = pygame.transform.scale_by(tile_image,
+                                                           self.map_scale)
+                    self.map_surface.blit(tile_image, self.grid_rects[y][x])
+
     def _render_grid(self):
         width = self.map_size[0] * self.cell_size
         height = self.map_size[1] * self.cell_size
@@ -93,7 +116,6 @@ class MapMaker:
         has_drawn_x_lines = False
         for y in range(0, height+1, self.cell_size):
             new_row = []
-
             pygame.draw.line(self.grid_surface, self.grid_color, 
                              (0, y), 
                              (width, y))
@@ -107,7 +129,6 @@ class MapMaker:
                              (x, height))
             self.grid_rects.append(new_row)
             has_drawn_x_lines = True
-        self._render_tiles_on_map()
                 
         self.grid_rect = self.grid_surface.get_rect(
             center = self.game.rect.center)
@@ -153,5 +174,12 @@ class MapMaker:
 
     def _add_tile_to_map(self, x, y):
         self.grid[y][x].append(self.active_tile_index)
-        self._render_grid()
+        self._render_map()
+
+    def _remove_tile_from_map(self, x, y):
+        try: self.grid[y][x].pop()
+        except IndexError: pass
         
+        if self.game.lshift_pressed: self.grid[y][x] = []
+        
+        self._render_map()
