@@ -14,7 +14,8 @@ class Game:
 
         pygame.init()
         self.settings = Settings()
-        pygame.display.set_caption(self.settings.WINDOW_TITLE) 
+        pygame.display.set_caption(self.settings.WINDOW_TITLE)
+        self.clock = pygame.time.Clock()
         self._initialize_screen()
 
         self.map = Map(self, self.settings.map)
@@ -27,6 +28,7 @@ class Game:
 
     def run(self):
         while True:
+            self.clock.tick(self.settings.FRAMERATE)
             self._update()
             self._draw()
             self._handle_input()

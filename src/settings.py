@@ -1,5 +1,7 @@
 class Settings:
     def __init__(self):
+        self.FRAMERATE = 30
+
         # Assets
         self.spritemap = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\UnizenCustom.png"
         self.map = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\map.map"

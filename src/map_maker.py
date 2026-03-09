@@ -9,11 +9,13 @@ class MapMaker:
         self.map_size = map_size
         self.cell_size = cell_size * map_scale
         self.darkmode_on = False
-
-        self.toggle_darkmode()
-        
         self.active_tile_index = 0
         self.tiles = self.game.map.tileset.non_empty_tiles
+        self.grid = [[[] for _ in range(self.map_size[0])]
+                                for _ in range(self.map_size[1])]
+        self.grid_rects =  []
+
+        self.toggle_darkmode()
 
     def pan(self, position_increment:list[int,int]):
         speed = self.cell_size
@@ -39,8 +41,8 @@ class MapMaker:
         self.active_tile_index = new_tile_index
 
     def on_click(self, event):
-        if not self.grid_rect.collidepoint(mouse_position): return
         mouse_position = pygame.mouse.get_pos()
+        if not self.grid_rect.collidepoint(mouse_position): return
 
         left_click = event.button == 1
         right_click = event.button == 3
@@ -50,7 +52,7 @@ class MapMaker:
         for y, row in enumerate (self.grid_rects):
             for x, rect in enumerate (row):
                 if not rect.collidepoint(mouse_position): continue
-                self.add_tile_to_map(rect)
+                self._add_tile_to_map(x, y)
 
     def toggle_darkmode(self):
         if self.darkmode_on: 
@@ -88,13 +90,10 @@ class MapMaker:
         height = self.map_size[1] * self.cell_size
 
         self.grid_surface = pygame.Surface((width+1, height+1), pygame.SRCALPHA)
-        self.grid = [[['G'] for _ in range(self.map_size[0])]
-                         for _ in range(self.map_size[1])]
-        self.grid_rects = []
         has_drawn_x_lines = False
         for y in range(0, height+1, self.cell_size):
             new_row = []
-            
+
             pygame.draw.line(self.grid_surface, self.grid_color, 
                              (0, y), 
                              (width, y))
@@ -108,9 +107,17 @@ class MapMaker:
                              (x, height))
             self.grid_rects.append(new_row)
             has_drawn_x_lines = True
+        self._render_tiles_on_map()
                 
         self.grid_rect = self.grid_surface.get_rect(
             center = self.game.rect.center)
+        
+    def _render_tiles_on_map(self):
+        for y, row in enumerate(self.grid):
+            for x, tile in enumerate(row):
+                for tile_index in tile:
+                    self.grid_surface.blit(self.tiles[tile_index][1], 
+                                           self.grid_rects[y][x])
 
     def _render_background(self):
         checkers_per_screen = 5
@@ -143,3 +150,8 @@ class MapMaker:
 
     def update(self):
         pass
+
+    def _add_tile_to_map(self, x, y):
+        self.grid[y][x].append(self.active_tile_index)
+        self._render_grid()
+        
