@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 
 
 class Tileset:
@@ -15,6 +16,7 @@ class Tileset:
 
     def _get_tiles(self):
         self.tiles = []
+        self.non_empty_tiles = []
         step_value = self.cell_size + self.padding
         image_width = self.surface.get_width()
         image_height = self.surface.get_height() 
@@ -26,7 +28,17 @@ class Tileset:
                                                    self.cell_size,
                                                    self.cell_size)
                 new_row.append(new_tile)
+                
+                if self.is_fully_transparent(new_tile): continue
+                xtile = x//self.cell_size
+                ytile = x//self.cell_size
+
+                self.non_empty_tiles.append(((xtile, ytile), new_tile))
             self.tiles.append(new_row)
 
     def get_tile(self, tile_column, tile_row):
         return self.tiles[tile_column][tile_row]
+    
+    def is_fully_transparent(self, surface):
+        alpha = pygame.surfarray.pixels_alpha(surface)
+        return np.all(alpha == 0)

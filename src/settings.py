@@ -8,6 +8,7 @@ class Settings:
         self.BLACK = (0,0,0)
         self.WHITE = (255,255,255)
         self.GREY = (147,147,147)
+        self.DARK_GREY = (100,100,100)
         self.RED = (255,0,0)
         self.GREEN = (0,255,0)
         self.BLUE = (0,0,255)
