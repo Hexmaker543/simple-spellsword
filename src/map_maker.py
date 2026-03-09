@@ -14,6 +14,7 @@ class MapMaker:
         self.grid = [[[] for _ in range(self.map_size[0])]
                                 for _ in range(self.map_size[1])]
         self.grid_rects =  []
+        self.scroll_offset = [0,0]
 
         self.toggle_darkmode()
         self._render_map()
@@ -28,11 +29,6 @@ class MapMaker:
         self.grid_rect.x += xstep
         self.grid_rect.y += ystep
 
-        for row in self.grid_rects:
-            for rect in row:
-                rect.x += xstep
-                rect.y += ystep
-
     def on_scroll(self, event):
         new_tile_index = self.active_tile_index + event.y
         
@@ -43,6 +39,8 @@ class MapMaker:
 
     def on_click(self, event):
         mouse_position = pygame.mouse.get_pos()
+        if not self.grid_rect.collidepoint(mouse_position): return
+
         left_click = event.button == 1
         right_click = event.button == 3
 
@@ -54,13 +52,15 @@ class MapMaker:
         elif left_click: self._add_tile_to_map(tilex, tiley)
 
     def _get_clicked_tile(self, mouse_position):
-        if not self.grid_rect.collidepoint(mouse_position): return
+        local_x = mouse_position[0] - self.grid_rect.x
+        local_y = mouse_position[1] - self.grid_rect.y
+        local_mouse_pos = (local_x, local_y)
 
-        for y, row in enumerate (self.grid_rects):
-            for x, rect in enumerate (row):
-                if not rect.collidepoint(mouse_position): continue
-                return x, y
-
+        for y, row in enumerate(self.grid_rects):
+            for x, rect in enumerate(row):
+                if rect.collidepoint(local_mouse_pos):
+                    return x, y
+            
     def toggle_darkmode(self):
         if self.darkmode_on: 
             bg_checker_colors = (self.game.settings.WHITE,
