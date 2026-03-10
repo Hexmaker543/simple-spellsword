@@ -1,4 +1,7 @@
 import pygame
+import tkinter as tk
+from tkinter import filedialog
+from pathlib import Path
 
 
 class MapMaker:
@@ -89,7 +92,7 @@ class MapMaker:
         active_tile = self.tiles[self.active_tile_index][1]
         active_tile = pygame.transform.scale(active_tile, (self.cell_size, 
                                                            self.cell_size))
-        active_tile_rect = active_tile.get_rect(bottomright = mouse_position)
+        active_tile_rect = active_tile.get_rect(center = mouse_position)
 
         self.game.screen.blit(active_tile, active_tile_rect)
 
@@ -183,3 +186,29 @@ class MapMaker:
         if self.game.lshift_pressed: self.grid[y][x] = []
         
         self._render_map()
+
+    def save_map(self):
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)
+
+        save_file = filedialog.asksaveasfile(mode="W", defaultextension='map',
+                                             title="Save map")
+        
+        file = Path(save_file)
+
+        map_sizex = self.map_size[0]
+        map_sizey = self.map_size[1]
+        map_scale = self.game.map.tile_scale
+        padding = self.game.map.tileset.padding
+        cell_size = self.cell_size
+        tileset_filepath = self.game.map.tileset.filepath
+        
+        file.write_text(
+f"""MAP_SIZE, {map_sizex}, {map_sizey}, {map_scale}
+TILEMAP_PATH, {cell_size}, {padding}, {tileset_filepath}
+
+
+""")
+
+        root.destroy()

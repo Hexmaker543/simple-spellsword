@@ -17,6 +17,7 @@ class Game:
         pygame.display.set_caption(self.settings.WINDOW_TITLE)
         self.clock = pygame.time.Clock()
         self._initialize_screen()
+        pygame.mouse.set_visible(False)
 
         self.map = Map(self, self.settings.map)
         self.map_maker = MapMaker(self, (15,15), 12)
