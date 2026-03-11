@@ -1,7 +1,7 @@
 import pygame
 import tkinter as tk
 from tkinter import filedialog
-from pathlib import Path
+from random import randint
 
 
 class MapMaker:
@@ -249,7 +249,7 @@ class MapMaker:
         map_sizey = self.map_size[1]
         map_scale = self.game.map.tile_scale
         padding = self.game.map.tileset.padding
-        cell_size = self.cell_size
+        cell_size = self.cell_size // map_scale
         tileset_filepath = self.game.map.tileset.filepath
 
         save_file.write(
@@ -258,24 +258,56 @@ f"""MAP_SIZE, {map_sizex}, {map_sizey}, {map_scale}
 TILEMAP_PATH, {cell_size}, {padding}, {tileset_filepath}
 
 """)
+        prefixed_identifiers = self._get_prefixed_identifiers()
         printed_layers = []
-        for row in self.grid:
+        for row in self.grid.copy():
             for tile in row:
-                for layer in tile:
-                    if layer in printed_layers: continue
+                for index, layer in enumerate(tile):
+                    if prefixed_identifiers[layer] in printed_layers: continue
                     
                     tilex = self.tiles[layer][0][0]
                     tiley = self.tiles[layer][0][1]
+
+                    pfx_layer = prefixed_identifiers[layer]
+
+                    save_file.write(f"{pfx_layer}, false, {tiley}, {tilex}\n")
                     
-                    save_file.write(f"{layer}, false, {tilex}, {tiley}\n")
-                    
-                    printed_layers.append(layer)
+                    printed_layers.append(prefixed_identifiers[layer])
 
         save_file.write('\nSTART_MAP\n')
-        for row in self.grid:
+        for row in self.grid.copy():
             for tile in row:
-                save_file.write(str(tile))
+                if len(tile) > 1: save_file.write('[')
+
+                for index, layer in enumerate(tile):
+                    layer = prefixed_identifiers[layer]
+
+                    save_file.write(f"{layer}")
+                    if (not index+1 >= len(tile)
+                        or len(tile) == 1): save_file.write(' ')
+                
+                if len(tile) > 1 : save_file.write('] ')
             save_file.write('\n')
         save_file.write('END_MAP')
 
         root.destroy()
+
+    def _get_prefixed_identifiers(self):
+        identifiers = {identifier
+            for row in self.grid
+            for tile in row
+            for identifier in tile}
+        identifier_count = len(identifiers)
+
+        unique_prefixes = set()
+        
+        while len(unique_prefixes) < identifier_count:
+            unique_prefixes.add(randint(123, max(identifier_count, 999)))
+        
+        unique_prefixed_identifiers = {}
+        for index in range(len(identifiers)):
+            prefix = list(unique_prefixes)[index]
+            identifier = list(identifiers)[index]
+            unique_prefixed_identifiers[identifier]=(f"{prefix}-{identifier}")
+
+        return unique_prefixed_identifiers

@@ -3,13 +3,16 @@ from pygame.sprite import Sprite
 
 
 class Tile(Sprite):
-    def __init__(self, Game, tile_position, image, tile_identifier, is_solid:bool=False):
+    def __init__(self, Game, tile_position, image, tile_identifier, 
+                 is_solid:bool=False,
+                 is_topmost:bool=False):
         super().__init__()
         self.game = Game
         self.position = tile_position
         self.image = image
         self.identifier = tile_identifier
         self.is_solid = is_solid
+        self.is_topmost = is_topmost
 
         self._render()
 

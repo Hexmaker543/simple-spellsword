@@ -51,12 +51,18 @@ class Map():
     def _map_player(self):
         x = self.game.player.position[0]
         y = self.game.player.position[1]
-        self.grid[y][x].insert(1, self.game.player)
+        
+        for index, layer in enumerate(self.grid[y][x]):
+            if layer.is_topmost: 
+                self.grid[y][x].insert(index, self.game.player)
+                return
+        
+        self.grid[y][x].append(self.game.player)
 
     def _unmap_player(self):
         x = self.game.player.position[0]
         y = self.game.player.position[1]
-        del self.grid[y][x][1]
+        self.grid[y][x].remove(self.game.player)
 
     def update(self):
         self.all_sprites.update()
@@ -73,11 +79,16 @@ class Map():
 
     def _handle_legend_entry(self, words):
         identifier = words[0]
-        is_solid = self._parse_boolean(words[1])
-        image_x = int(words[2])
-        image_y = int(words[3])
+        image_x = int(words[1])
+        image_y = int(words[2])
+        is_solid = False
+        is_topmost = False
+        
+        if len(words) > 3: is_solid = self._parse_boolean(words[3])
+        if len(words) > 4: is_topmost = self._parse_boolean(words[4])
+
         image = self.tileset.get_tile(image_x, image_y)
-        self.legend[identifier] = [is_solid, image]
+        self.legend[identifier] = [is_solid, is_topmost, image]
 
     def _parse_boolean(self, bool_string):
         if bool_string.lower() == 'false': return False
@@ -86,12 +97,14 @@ class Map():
 
     def _create_tile(self, identifier, x, y):
         is_solid = self.legend[identifier][0]
-        image = self.legend[identifier][1]
+        is_topmost = self.legend[identifier][1]
+        image = self.legend[identifier][2]
         return Tile(Game=self.game, 
             tile_position=[x,y], 
             tile_identifier=identifier,
             image=image,
             is_solid=is_solid,
+            is_topmost=is_topmost
         )
     
     def _add_tile(self, identifier, x, y):

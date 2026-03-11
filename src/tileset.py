@@ -31,7 +31,7 @@ class Tileset:
                 
                 if self.is_fully_transparent(new_tile): continue
                 xtile = x//self.cell_size
-                ytile = x//self.cell_size
+                ytile = y//self.cell_size
 
                 self.non_empty_tiles.append(((xtile, ytile), new_tile))
             self.tiles.append(new_row)

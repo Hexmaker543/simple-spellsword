@@ -4,7 +4,7 @@ class Settings:
 
         # Assets
         self.spritemap = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\UnizenCustom.png"
-        self.map = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\map.map"
+        self.map = r"C:\Users\asmod\Lair\Projects\Simple SpellSword\assets\test.map"
 
         # Color
         self.BLACK = (0,0,0)
