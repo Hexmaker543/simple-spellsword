@@ -212,6 +212,7 @@ class MapMaker:
         except IndexError: return
         if self.previously_added_tile == [x,y]: return
 
+        if self.active_tile_index in self.grid[y][x]: return
         self.grid[y][x].append(self.active_tile_index)
 
         self.previously_added_tile = [x,y]
@@ -251,34 +252,30 @@ class MapMaker:
         cell_size = self.cell_size
         tileset_filepath = self.game.map.tileset.filepath
 
-        corrected_grid = self._get_corrected_grid()
-
         save_file.write(
 f"""MAP_SIZE, {map_sizex}, {map_sizey}, {map_scale}
 
 TILEMAP_PATH, {cell_size}, {padding}, {tileset_filepath}
 
-START_MAP
 """)
-        for row in corrected_grid:
+        printed_layers = []
+        for row in self.grid:
+            for tile in row:
+                for layer in tile:
+                    if layer in printed_layers: continue
+                    
+                    tilex = self.tiles[layer][0][0]
+                    tiley = self.tiles[layer][0][1]
+                    
+                    save_file.write(f"{layer}, false, {tilex}, {tiley}\n")
+                    
+                    printed_layers.append(layer)
+
+        save_file.write('\nSTART_MAP\n')
+        for row in self.grid:
             for tile in row:
                 save_file.write(str(tile))
             save_file.write('\n')
         save_file.write('END_MAP')
 
         root.destroy()
-
-    def _get_corrected_grid(self):
-        corrected_grid = []
-
-        for row in self.grid:
-            new_row = []
-            for tile in row:
-                new_tile = []
-                for layer in tile:
-                    new_layer = self.tiles[layer][0]
-                    new_tile.append(new_layer)
-                new_row.append(new_tile)
-            corrected_grid.append(new_row)
-
-        return corrected_grid
