@@ -11,7 +11,12 @@ class MapMaker:
         self.map_scale = map_scale
         self.map_size = map_size
         self.cell_size = cell_size * map_scale
-        self.darkmode_on = False
+        self.darkmode_on = True
+        self.left_mouse_button_pressed = False
+        self.right_mouse_button_pressed = False
+        self.previously_removed_tile = None
+        self.previously_added_tile = None
+        self.previous_active_tile_index = None
         self.active_tile_index = 0
         self.tiles = self.game.map.tileset.non_empty_tiles
         self.grid = [[[] for _ in range(self.map_size[0])]
@@ -41,20 +46,24 @@ class MapMaker:
         self.active_tile_index = new_tile_index
 
     def on_click(self, event):
-        mouse_position = pygame.mouse.get_pos()
-        if not self.grid_rect.collidepoint(mouse_position): return
-
         left_click = event.button == 1
-        right_click = event.button == 3
+        right_click = event.button == 3 
+        
+        if left_click: self.left_mouse_button_pressed = True
+        if right_click: self.right_mouse_button_pressed = True
 
-        tilex, tiley = self._get_clicked_tile(mouse_position)
-
+    def off_click(self, event):
+        left_click = event.button == 1
+        right_click = event.button == 3 
+        
+        if left_click: self.left_mouse_button_pressed = False
         if right_click: 
-            self._remove_tile_from_map(tilex, tiley)
-            return
-        elif left_click: self._add_tile_to_map(tilex, tiley)
+            self.right_mouse_button_pressed = False
+            self.previously_removed_tile = None
 
-    def _get_clicked_tile(self, mouse_position):
+    def _get_clicked_tile(self):
+        mouse_position = pygame.mouse.get_pos()
+
         local_x = mouse_position[0] - self.grid_rect.x
         local_y = mouse_position[1] - self.grid_rect.y
         local_mouse_pos = (local_x, local_y)
@@ -68,12 +77,12 @@ class MapMaker:
         if self.darkmode_on: 
             bg_checker_colors = (self.game.settings.WHITE,
                                  self.game.settings.GREY)
-            grid_color = (0, 0, 0, 147)
+            grid_color = (255, 255, 255, 147)
             self.darkmode_on = False
         else:
             bg_checker_colors = (self.game.settings.BLACK,
                                 self.game.settings.DARK_GREY)
-            grid_color = (255, 255, 255, 147)
+            grid_color = (0, 0, 0, 147)
             self.darkmode_on = True
 
         self.grid_color = grid_color
@@ -83,8 +92,8 @@ class MapMaker:
 
     def draw(self):
         self.game.screen.blit(self.bg_surface, self.bg_rect)
-        self.game.screen.blit(self.grid_surface, self.grid_rect)
         self.game.screen.blit(self.map_surface, self.grid_rect)
+        self.game.screen.blit(self.grid_surface, self.grid_rect)
         self._draw_active_tile()
 
     def _draw_active_tile(self):
@@ -173,18 +182,58 @@ class MapMaker:
             self.bg_surface = pygame.transform.box_blur(self.bg_surface, 5)
 
     def update(self):
-        pass
+        self._update_mouse_on_map_bool()
+        self._refresh_active_tile_cache_on_index_switch()
 
-    def _add_tile_to_map(self, x, y):
+        self._remove_tile_from_map()
+        self._add_tile_to_map()
+
+    def _update_mouse_on_map_bool(self):
+        mouse_position = pygame.mouse.get_pos()
+        
+        if self.grid_rect.collidepoint(mouse_position):
+            self.mouse_on_map = True
+        else: self.mouse_on_map = False
+
+    def _refresh_active_tile_cache_on_index_switch(self):
+        if self.previous_active_tile_index == self.active_tile_index: return
+        else:
+            self.previously_added_tile = None
+            self.previously_removed_tile = None
+            self.previous_active_tile_index = self.active_tile_index
+
+    def _add_tile_to_map(self):
+        if not self.left_mouse_button_pressed: return
+        if not self.mouse_on_map: return
+
+        x, y = self._get_clicked_tile()
+        try: 
+            if self.grid[y][x]: pass
+        except IndexError: return
+        if self.previously_added_tile == [x,y]: return
+
         self.grid[y][x].append(self.active_tile_index)
+
+        self.previously_added_tile = [x,y]
         self._render_map()
 
-    def _remove_tile_from_map(self, x, y):
+    def _remove_tile_from_map(self):
+        if self.left_mouse_button_pressed: return
+        if not self.right_mouse_button_pressed: return
+        if not self.mouse_on_map: return
+        
+        x, y = self._get_clicked_tile()
+        try: 
+            if self.grid[y][x]: pass
+        except IndexError: return
+        if self.previously_removed_tile == [x,y]: return
+
         try: self.grid[y][x].pop()
         except IndexError: pass
         
         if self.game.lshift_pressed: self.grid[y][x] = []
         
+        self.previously_removed_tile = [x,y]
         self._render_map()
 
     def save_map(self):
@@ -192,23 +241,44 @@ class MapMaker:
         root.withdraw()
         root.attributes('-topmost', True)
 
-        save_file = filedialog.asksaveasfile(mode="W", defaultextension='map',
+        save_file = filedialog.asksaveasfile(mode="w", defaultextension='.map',
                                              title="Save map")
         
-        file = Path(save_file)
-
         map_sizex = self.map_size[0]
         map_sizey = self.map_size[1]
         map_scale = self.game.map.tile_scale
         padding = self.game.map.tileset.padding
         cell_size = self.cell_size
         tileset_filepath = self.game.map.tileset.filepath
-        
-        file.write_text(
+
+        corrected_grid = self._get_corrected_grid()
+
+        save_file.write(
 f"""MAP_SIZE, {map_sizex}, {map_sizey}, {map_scale}
+
 TILEMAP_PATH, {cell_size}, {padding}, {tileset_filepath}
 
-
+START_MAP
 """)
+        for row in corrected_grid:
+            for tile in row:
+                save_file.write(str(tile))
+            save_file.write('\n')
+        save_file.write('END_MAP')
 
         root.destroy()
+
+    def _get_corrected_grid(self):
+        corrected_grid = []
+
+        for row in self.grid:
+            new_row = []
+            for tile in row:
+                new_tile = []
+                for layer in tile:
+                    new_layer = self.tiles[layer][0]
+                    new_tile.append(new_layer)
+                new_row.append(new_tile)
+            corrected_grid.append(new_row)
+
+        return corrected_grid

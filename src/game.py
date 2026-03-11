@@ -53,6 +53,8 @@ class Game:
                 if self.map_maker_active: self.map_maker.on_scroll(event)
             if event.type == pygame.MOUSEBUTTONDOWN: 
                 if self.map_maker_active: self.map_maker.on_click(event)
+            if event.type == pygame.MOUSEBUTTONUP:
+                if self.map_maker_active: self.map_maker.off_click(event)
 
     def _handle_keydown_events(self, event):
         m_pressed = pygame.key.get_pressed()[pygame.K_m]
@@ -84,7 +86,9 @@ class Game:
         if event.key == pygame.K_d: self.map_maker.pan((-1,0))
         if event.key == pygame.K_a: self.map_maker.pan((1,0))
 
-        if event.key== pygame.K_TAB: self.map_maker.toggle_darkmode()
+        if event.key == pygame.K_TAB: self.map_maker.toggle_darkmode()
+
+        if event.key == pygame.K_e: self.map_maker.save_map()
 
     def _handle_keyup_events(self, event):
         if event.key == pygame.K_LSHIFT: self.lshift_pressed = False
