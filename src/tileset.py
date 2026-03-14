@@ -40,5 +40,5 @@ class Tileset:
         return self.tiles[tile_column][tile_row]
     
     def is_fully_transparent(self, surface):
-        alpha = pygame.surfarray.pixels_alpha(surface)
-        return np.all(alpha == 0)
+        entire_alpha = pygame.surfarray.pixels_alpha(surface)
+        return np.all(entire_alpha == 0)
